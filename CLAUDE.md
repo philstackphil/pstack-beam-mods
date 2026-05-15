@@ -43,9 +43,21 @@ Each mod has an `info.json` at its root (inside the zip):
 
 - BeamNG uses **Lua 5.1** for all game-side scripting.
 - Extensions are loaded with `extensions.load("gameplay/myMod")`.
-- Each extension should expose `M.onInit`, `M.onExtensionLoaded`, etc. as needed.
+- Each extension should expose `M.onExtensionLoaded`, `M.onExtensionUnloaded`, `M.onUpdate(dt)`, etc. as needed.
 - Use `Scenario` API for structured game modes; use `extensions.hook` to fire events.
-- Debug with the in-game Lua console (F11 → Lua).
+- Keyboard input in GE extensions: `im.IsKeyPressed(keyCode)` inside `onUpdate`. Key codes for letter keys match their ASCII value (`string.byte('H')` = 72).
+- Debug with the in-game Lua console (`F11` → Lua tab).
+- Expose a `M.drop()` / `M.trigger()` alias on public modes so you can test from the console without pressing the hotkey.
+
+#### Drop the Hammer
+
+- Extension: `gameplay/dropTheHammer`
+- Hotkey: `H` (configurable via `HOTKEY` at top of file)
+- Proxy vehicle: `drop_hammer_crate` (8-node rigid box, 600 kg, indestructible beams)
+- Spawns 14 AI traffic cars on load via `extensions.traffic.activate()`
+- Wreckage is persistent — crates stay in world until session ends or player clears them
+- Console test: `extensions.gameplay_dropTheHammer.drop()`
+- Known limitation: crate is invisible in v1 (no flexbody mesh); add a `.dae` + flexbody entry to the JBeam for a visible model
 
 ### Skin Mods (`art/vehicles/<vehicle_name>/`)
 
