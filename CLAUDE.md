@@ -18,7 +18,7 @@ dist/             — output zips (gitignored)
 
 BeamNG mods are **zip files** whose internal directory structure mirrors the game's content tree. The game loads them from:
 
-- **Windows**: `%USERPROFILE%\Documents\BeamNG.drive\mods\`
+- **Windows**: `%LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods\`
 - **Linux (Steam/Proton)**: `~/.local/share/Steam/steamapps/compatdata/<appid>/pfx/drive_c/users/steamuser/Documents/BeamNG.drive/mods/`
 
 Each mod has an `info.json` at its root (inside the zip):

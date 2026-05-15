@@ -1,9 +1,8 @@
 # deploy-windows.ps1 — deploy mod files to BeamNG for development.
 #
 # Vehicles require the zip path, so this script:
-#   1. Packs each mod into a .zip → Documents\BeamNG.drive\mods\
-#   2. Also copies .lua files directly → Documents\BeamNG.drive\lua\...
-#      so you can hot-reload Lua changes without restarting the game.
+#   1. Packs each mod into a .zip → %LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods\
+#   2. Also copies .lua files directly → same tree, for hot-reload without restart.
 #
 # Usage (from repo root):
 #   .\scripts\deploy-windows.ps1              # deploy all mods
@@ -20,7 +19,9 @@ param(
 
 # ── locate BeamNG folders ─────────────────────────────────────────────────────
 
-$beamDir     = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'BeamNG.drive'
+# BeamNG stores user data in AppData\Local, not Documents.
+# The 'current' folder is a pointer to the active version's data.
+$beamDir     = "$env:LOCALAPPDATA\BeamNG\BeamNG.drive\current"
 $beamModsDir = Join-Path $beamDir 'mods'
 
 if (-not (Test-Path $beamDir)) {
