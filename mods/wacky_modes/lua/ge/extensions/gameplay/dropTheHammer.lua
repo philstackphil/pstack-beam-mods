@@ -7,7 +7,7 @@ local M = {}
 
 -- ── config ────────────────────────────────────────────────────────────────────
 
-local HOTKEY        = 'H'   -- change to any uppercase letter/key name
+local HOTKEY        = 'h'   -- lowercase for ActionMap:bind(); change freely
 local SEARCH_RADIUS = 50    -- metres: how far to scan for target vehicles
 local DROP_HEIGHT   = 15    -- metres above target when spawning the crate (~50 ft)
 local AHEAD_DIST    = 6     -- metres ahead of player when no target found (~20 ft)
@@ -17,6 +17,7 @@ local TRAFFIC_COUNT = 14    -- AI cars to fill the city on load
 -- ── state ─────────────────────────────────────────────────────────────────────
 
 local hammerCount = 0
+local actionMap   = nil
 
 -- ── target selection ──────────────────────────────────────────────────────────
 
@@ -51,12 +52,10 @@ local function performDrop()
   if target then
     spawnPos = target:getPosition() + vec3(0, 0, DROP_HEIGHT)
   else
-    -- No car nearby: drop just ahead of the player so it lands ~20 ft in front
     local fwd = playerVeh:getDirectionVector()
     spawnPos  = playerPos + fwd * AHEAD_DIST + vec3(0, 0, DROP_HEIGHT)
   end
 
-  -- Random yaw so the crate tumbles unpredictably on impact
   local yaw = math.rad(math.random(0, 359))
   core_vehicles.spawnNewVehicle(CRATE_MODEL, {
     pos              = spawnPos,
@@ -64,6 +63,10 @@ local function performDrop()
     config           = '',
     autoEnterVehicle = false,
   })
+
+  -- Silence the horn that the vehicle also received from the H key press.
+  -- queueLuaCommand runs in the vehicle's Lua context next tick.
+  playerVeh:queueLuaCommand("input.event('horn', 0, 2)")
 
   hammerCount = hammerCount + 1
   guihooks.trigger('toastrMsg', {
@@ -79,13 +82,20 @@ M.drop = performDrop
 
 -- ── input ─────────────────────────────────────────────────────────────────────
 
--- im.IsKeyPressed fires once per press (rising-edge), perfect for a drop action.
--- Key index for letter keys matches their ASCII value in BeamNG's ImGui bindings.
-local keyCode = string.byte(HOTKEY)
+local function setupInput()
+  -- ActionMap sits above the vehicle's input stack, so pushing it here
+  -- captures H before the vehicle's horn binding sees it.
+  actionMap = ActionMap()
+  actionMap:push()
+  actionMap:bind('keyboard', HOTKEY, function(val)
+    if val > 0 then performDrop() end
+  end)
+end
 
-function M.onUpdate(dt)
-  if im and im.IsKeyPressed(keyCode) then
-    performDrop()
+local function teardownInput()
+  if actionMap then
+    actionMap:pop()
+    actionMap = nil
   end
 end
 
@@ -107,15 +117,17 @@ end
 -- ── lifecycle ─────────────────────────────────────────────────────────────────
 
 function M.onExtensionLoaded()
+  setupInput()
   startTraffic()
   guihooks.trigger('toastrMsg', {
     type  = 'info',
     title = 'Drop the Hammer',
-    msg   = string.format('Ready! Press [%s] to drop a crate on the nearest car.', HOTKEY),
+    msg   = string.format('Ready! Press [%s] to drop a crate on the nearest car.', string.upper(HOTKEY)),
   })
 end
 
 function M.onExtensionUnloaded()
+  teardownInput()
   stopTraffic()
   hammerCount = 0
 end

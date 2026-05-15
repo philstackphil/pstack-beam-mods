@@ -9,7 +9,7 @@
 
     "nodes": [
       ["id",  "posX", "posY", "posZ"],
-      {"nodeWeight": 75, "collision": true, "selfCollision": false},
+      {"nodeWeight": 75, "collision": true, "selfCollision": false, "group": "crate_body"},
       ["b0",  -0.5, -0.5,  0.0],
       ["b1",   0.5, -0.5,  0.0],
       ["b2",  -0.5,  0.5,  0.0],
@@ -38,6 +38,11 @@
 
       ["b0","b3"], ["b1","b2"],
       ["t0","t3"], ["t1","t2"]
+    ],
+
+    "flexbodies": [
+      ["mesh", "[group]:", "nonFlexMaterials"],
+      ["drop_hammer_crate_mesh", ["crate_body"], []]
     ]
   }
 }
