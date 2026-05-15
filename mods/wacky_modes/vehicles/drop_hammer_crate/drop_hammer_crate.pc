@@ -1,8 +1,5 @@
 {
-  "format": 2,
-  "controls": [],
   "parts": {
     "": "drop_hammer_crate"
-  },
-  "vars": {}
+  }
 }
